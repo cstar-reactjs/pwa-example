@@ -7,12 +7,12 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const InlineChunkManifestHtmlWebpackPlugin = require('inline-chunk-manifest-html-webpack-plugin');
 const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin-loader');
 const PreloadWebpackPlugin = require('preload-webpack-plugin');
-const dotenvSafe = require('dotenv-safe').load();
+const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const pkg = require('./package.json');
 
-module.exports = ({production = false, ssr = false, lite = false} = {}) => {
-  process.env.NODE_ENV = production ? 'production' : 'development';
-
+module.exports = (env, { mode = "development", ssr = false, lite = false }) => {
+  const production = mode === "production";
+  process.env.NODE_ENV = production ? "production" : "development";
   // output filenames for main and chunks
   const output = {
     path: path.resolve(__dirname, './build'),
@@ -40,31 +40,50 @@ module.exports = ({production = false, ssr = false, lite = false} = {}) => {
 
   // webpack default configs
   const webpackConfig = {
+    mode,
     entry: {
       main: ['./src/main.js'],
       vendor: (lite ? [] : ['./src/stdlib.js']).concat(['react', 'react-dom'])
     },
     output,
     module: {
-      loaders: [{
+      rules: [{
         test: /\.(js|jsx)$/,
         include: path.resolve(__dirname, './src'),
-        loaders: 'babel-loader'
+        use: ['babel-loader']
       }]
     },
     devtool: sourceMap,
     resolve,
+    optimization: {
+      minimize: production,
+      minimizer: [
+        // https://webpack.js.org/plugins/uglifyjs-webpack-plugin/
+        new UglifyJsPlugin({
+          sourceMap: true,
+          uglifyOptions: {
+            mangle: true,
+            // http://lisperator.net/uglifyjs/compress
+            compress: {
+              unused: true,
+              dead_code: true,
+              warnings: false,
+              drop_debugger: true,
+              conditionals: true,
+              evaluate: true,
+              drop_console: true,
+              sequences: true,
+              booleans: true
+            },
+            beautify: false,
+            comments: false
+          },
+          extractComments: true
+        })
+      ]
+    },
     plugins: [
-      new optimize.CommonsChunkPlugin({
-        name: 'vendor'
-      }),
-      new optimize.CommonsChunkPlugin({
-        children: true,
-        async: 'common',
-        minChunks: 2
-      }),
       new DefinePlugin({
-        'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
         firebaseConfig: firebaseConfig
       }),
       new HtmlWebpackPlugin(Object.assign({
@@ -84,11 +103,11 @@ module.exports = ({production = false, ssr = false, lite = false} = {}) => {
         removeStyleLinkTypeAttributes: true,
         useShortDoctype: true
       } : {})),
-      new InlineChunkManifestHtmlWebpackPlugin({
-        filename: "chunk-manifest.json",
-        chunkManifestVariable: 'webpackChunkManifest',
-        dropAsset: true
-      }),
+      // new InlineChunkManifestHtmlWebpackPlugin({
+      //   filename: "chunk-manifest.json",
+      //   chunkManifestVariable: 'webpackChunkManifest',
+      //   dropAsset: true
+      // }),
       new PreloadWebpackPlugin({
         include: ['common', 'greeting']
       }),
@@ -131,26 +150,6 @@ module.exports = ({production = false, ssr = false, lite = false} = {}) => {
   // webpack additional build for production ready version
   if (production) {
     webpackConfig.plugins = webpackConfig.plugins.concat([
-      // https://webpack.js.org/plugins/uglifyjs-webpack-plugin/
-      new optimize.UglifyJsPlugin({
-        sourceMap,
-        mangle: true,
-        beautify: false,
-        comments: false,
-        // http://lisperator.net/uglifyjs/compress
-        compress: {
-          unused: true,
-          dead_code: true,
-          warnings: false,
-          drop_debugger: true,
-          conditionals: true,
-          evaluate: true,
-          drop_console: true,
-          sequences: true,
-          booleans: true,
-        },
-        extractComments: true
-      }),
       new LoaderOptionsPlugin({
         minimize: true,
         debug: false
