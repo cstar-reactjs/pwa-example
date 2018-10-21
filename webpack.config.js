@@ -9,6 +9,7 @@ const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin-loader');
 const PreloadWebpackPlugin = require('preload-webpack-plugin');
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const pkg = require('./package.json');
+require("dotenv-safe").config();
 
 module.exports = ({ ssr = false, lite = false } = {}, { mode = "development" }) => {
   const production = mode === "production";
