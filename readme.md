@@ -1,14 +1,14 @@
 # react-pwa-guide-kit-v2
 
 **Important:** This repo is a fork from [codebusking/react-pwa-guide-app](https://github.com/codebusking/react-pwa-guide-app) and it updates the main packages to their latest versions and add some others:
-- **Updated to** Webpack 4
-- **Updated to** Babel 7
+- **Updated** Webpack 4 and all the plugins used in the config.
+- **Updated** to Babel 7
 - **Added** [React Hot Loader](https://github.com/gaearon/react-hot-loader) for realtime coding experience
-- **Updated to** React 16.5 & PropTypes
+- **Updated** to React 16.5 & PropTypes
 - **Removed** React Tap Event Plugin as it is deprecated since React 16.4. See [https://github.com/zilverline/react-tap-event-plugin](https://github.com/zilverline/react-tap-event-plugin)
 - **Added** [Loadable Component](https://github.com/smooth-code/loadable-components) for code splitting and in replacement of the `asyncComponent` method.
-- **Updated to** Material UI 3.3.0
-- **Updated to** Firebase 5.5.4
+- **Updated** to Material UI 3.3.0
+- **Updated** to Firebase 5.5.4
 - **Added** [Cloud Firestore](https://firebase.google.com/docs/firestore/?hl=es-419) for the database implementation in the *Users* component.
 
 A pull request has been created in order to integrate these changes to the original repo.
