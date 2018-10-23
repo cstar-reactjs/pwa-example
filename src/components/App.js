@@ -22,11 +22,11 @@ class App extends React.Component {
     return (
       <Router>
         <AppShell>
-          <div>
+          <React.Fragment>
             <Route exact path="/" component={Greeting}/>
             <Route path="/users/:id?" component={Users}/>
             <Route path="/notification" component={Notification}/>
-          </div>
+          </React.Fragment>
         </AppShell>
       </Router>
     );
