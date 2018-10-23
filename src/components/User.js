@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {Avatar} from 'material-ui';
 import {Card, CardHeader, CardText} from 'material-ui/Card';
 import usersDatabase from '../services/UsersDatabase';
@@ -49,7 +50,7 @@ class User extends React.Component {
 }
 
 User.propTypes = {
-	user: React.PropTypes.object,
+	user: PropTypes.object,
 };
 
 export default User;
