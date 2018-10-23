@@ -9,8 +9,9 @@ const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin-loader');
 const PreloadWebpackPlugin = require('preload-webpack-plugin');
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const pkg = require('./package.json');
+require("dotenv-safe").config();
 
-module.exports = (env, { mode = "development", ssr = false, lite = false }) => {
+module.exports = ({ ssr = false, lite = false } = {}, { mode = "development" }) => {
   const production = mode === "production";
   process.env.NODE_ENV = production ? "production" : "development";
   // output filenames for main and chunks
@@ -21,13 +22,16 @@ module.exports = (env, { mode = "development", ssr = false, lite = false }) => {
   };
 
   // source map config
-  const sourceMap =  production ? 'cheap-module-source-map' : 'source-map';
+  const sourceMap = production ? "cheap-module-source-map" : "eval"; // "source-map"
 
   // firebase configs
   const firebaseConfig = JSON.stringify({
     apiKey: process.env.FIREBASE_API_KEY,
-    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-    databaseURL: process.env.FIREBASE_DATABASE_URL
+    authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+    databaseURL: process.env.FIREBASE_DATABASE_URL,
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID
   });
 
   // redirect the request of importing react to react-lite
@@ -43,7 +47,7 @@ module.exports = (env, { mode = "development", ssr = false, lite = false }) => {
     mode,
     entry: {
       main: ['./src/main.js'],
-      vendor: (lite ? [] : ['./src/stdlib.js']).concat(['react', 'react-dom'])
+      vendor: ['react', 'react-dom']
     },
     output,
     module: {
