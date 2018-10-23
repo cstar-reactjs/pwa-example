@@ -1,15 +1,32 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {Link} from 'react-router-dom';
-import {Avatar, Dialog, FlatButton, TextField, FloatingActionButton} from 'material-ui';
+import { withStyles } from '@material-ui/core/styles';
+import {
+  Dialog,
+  Button,
+  TextField,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  ListItem,
+  List
+} from '@material-ui/core';
+import AddIcon from '@material-ui/icons/Add';
 import User from './User'
 import usersDatabase from '../services/UsersDatabase';
-import {ContentAddIcon} from './Icons';
 
-const fabStyle = {
-	position: 'fixed',
-	bottom: '20px',
-	right: '20px'
-};
+const styles = theme => ({
+  container: {
+    flexGrow: 1
+  },
+  button: {
+    position: "fixed",
+    bottom: theme.spacing.unit,
+    right: theme.spacing.unit
+  }
+});
 
 class Users extends React.Component {
 	constructor(props) {
@@ -17,7 +34,9 @@ class Users extends React.Component {
 
 		this.state = {
 			users: Users.database().data(),
-			dialog: false
+			dialog: false,
+      name: "",
+      email: ""
 		};
 	}
 
@@ -42,10 +61,11 @@ class Users extends React.Component {
 	handleCloseDialog = () => this.setState({dialog: false})
 
 	handleSubmit = () => {
-		const user = {
-			name: this.nameText.getValue(),
-			email: this.emailText.getValue()
-		};
+    const { name, email } = this.state;
+    const user = {
+      name,
+      email
+    };
 
 		if (!user.name || !user.email) {
 			this.handleCloseDialog();
@@ -62,6 +82,13 @@ class Users extends React.Component {
 		});
 	}
 
+  handleInputChange = event => {
+    const {
+      target: { name, value }
+    } = event;
+    this.setState({ [name]: value });
+  };
+
 	render() {
 		const users = () => {
 			if (!this.state.users) {
@@ -70,44 +97,88 @@ class Users extends React.Component {
 
       if (this.props.match.params.id) {
         return (
-          <User user={this.state.users[this.props.match.params.id]}/>
+          <List>
+            <ListItem>
+              <User user={this.state.users[this.props.match.params.id]} />
+            </ListItem>
+          </List>
 				);
       }
 
-			return Object.keys(this.state.users).map(id => {
-				return (
-					<Link key={id} to={`/users/${id}`}>
-						<User user={this.state.users[id]}/>
-					</Link>
-				);
-			});
-		};
-		return (
-			<div>
-				{users()}
-				<FloatingActionButton style={fabStyle} onTouchTap={this.handleOpenDialog}>
-					<ContentAddIcon/>
-				</FloatingActionButton>
-				<Dialog
-					title="Adding New User"
-					actions={<FlatButton label="Submit" primary={true} onTouchTap={this.handleSubmit}/>}
-					modal={false}
-					open={this.state.dialog}
-					onRequestClose={this.handleCloseDialog}
-				>
-					<div>
-						Input your name and email address.
-					</div>
-					<TextField hintText="Name" name="name" ref={ref => this.nameText = ref}/>
-					<TextField hintText="Email" name="email" ref={ref => this.emailText = ref}/>
-				</Dialog>
-			</div>
-		);
+			return (
+        <List>
+          {Object.keys(this.state.users).map(id => (
+            <ListItem button component={Link} to={`/users/${id}`} key={id}>
+              <User user={this.state.users[id]} />
+            </ListItem>
+          ))}
+        </List>
+      );
+    };
+
+    const addButton = () => {
+      if (this.props.match.params.id) {
+        return null;
+      }
+
+      const { classes } = this.props;
+      return (
+        <React.Fragment>
+          <Button
+            className={classes.button}
+            variant="fab"
+            color="primary"
+            aria-label="Add"
+            onClick={this.handleOpenDialog}
+          >
+            <AddIcon />
+          </Button>
+          <Dialog open={this.state.dialog} onClose={this.handleCloseDialog}>
+            <DialogTitle>Adding New User</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                Input your name and email address.
+              </DialogContentText>
+              <TextField
+                margin="dense"
+                autoFocus
+                fullWidth
+                label="Name"
+                name="name"
+                value={this.state.name}
+                onChange={this.handleInputChange}
+              />
+              <TextField
+                margin="dense"
+                fullWidth
+                label="Email"
+                name="email"
+                type="email"
+                value={this.state.email}
+                onChange={this.handleInputChange}
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button color="primary" onClick={this.handleSubmit}>
+                Submit
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </React.Fragment>
+      );
+    };
+
+    return (
+      <React.Fragment>
+        {users()}
+        {addButton()}
+      </React.Fragment>
+    );
 	}
 }
 
 Users.propTypes = {
-	params: React.PropTypes.object
+  params: PropTypes.object
 };
 
-export default Users;
+export default withStyles(styles)(Users);

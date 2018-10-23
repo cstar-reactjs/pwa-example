@@ -7,12 +7,13 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const InlineChunkManifestHtmlWebpackPlugin = require('inline-chunk-manifest-html-webpack-plugin');
 const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin-loader');
 const PreloadWebpackPlugin = require('preload-webpack-plugin');
-const dotenvSafe = require('dotenv-safe').load();
+const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const pkg = require('./package.json');
+require("dotenv-safe").config();
 
-module.exports = ({production = false, ssr = false, lite = false} = {}) => {
-  process.env.NODE_ENV = production ? 'production' : 'development';
-
+module.exports = ({ ssr = false, lite = false } = {}, { mode = "development" }) => {
+  const production = mode === "production";
+  process.env.NODE_ENV = production ? "production" : "development";
   // output filenames for main and chunks
   const output = {
     path: path.resolve(__dirname, './build'),
@@ -21,13 +22,16 @@ module.exports = ({production = false, ssr = false, lite = false} = {}) => {
   };
 
   // source map config
-  const sourceMap =  production ? 'cheap-module-source-map' : 'source-map';
+  const sourceMap = production ? "cheap-module-source-map" : "eval"; // "source-map"
 
   // firebase configs
   const firebaseConfig = JSON.stringify({
     apiKey: process.env.FIREBASE_API_KEY,
-    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-    databaseURL: process.env.FIREBASE_DATABASE_URL
+    authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+    databaseURL: process.env.FIREBASE_DATABASE_URL,
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID
   });
 
   // redirect the request of importing react to react-lite
@@ -40,31 +44,50 @@ module.exports = ({production = false, ssr = false, lite = false} = {}) => {
 
   // webpack default configs
   const webpackConfig = {
+    mode,
     entry: {
       main: ['./src/main.js'],
-      vendor: (lite ? [] : ['./src/stdlib.js']).concat(['react', 'react-dom'])
+      vendor: ['react', 'react-dom']
     },
     output,
     module: {
-      loaders: [{
+      rules: [{
         test: /\.(js|jsx)$/,
         include: path.resolve(__dirname, './src'),
-        loaders: 'babel-loader'
+        use: ['babel-loader']
       }]
     },
     devtool: sourceMap,
     resolve,
+    optimization: {
+      minimize: production,
+      minimizer: [
+        // https://webpack.js.org/plugins/uglifyjs-webpack-plugin/
+        new UglifyJsPlugin({
+          sourceMap: true,
+          uglifyOptions: {
+            mangle: true,
+            // http://lisperator.net/uglifyjs/compress
+            compress: {
+              unused: true,
+              dead_code: true,
+              warnings: false,
+              drop_debugger: true,
+              conditionals: true,
+              evaluate: true,
+              drop_console: true,
+              sequences: true,
+              booleans: true
+            },
+            beautify: false,
+            comments: false
+          },
+          extractComments: true
+        })
+      ]
+    },
     plugins: [
-      new optimize.CommonsChunkPlugin({
-        name: 'vendor'
-      }),
-      new optimize.CommonsChunkPlugin({
-        children: true,
-        async: 'common',
-        minChunks: 2
-      }),
       new DefinePlugin({
-        'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
         firebaseConfig: firebaseConfig
       }),
       new HtmlWebpackPlugin(Object.assign({
@@ -84,11 +107,11 @@ module.exports = ({production = false, ssr = false, lite = false} = {}) => {
         removeStyleLinkTypeAttributes: true,
         useShortDoctype: true
       } : {})),
-      new InlineChunkManifestHtmlWebpackPlugin({
-        filename: "chunk-manifest.json",
-        chunkManifestVariable: 'webpackChunkManifest',
-        dropAsset: true
-      }),
+      // new InlineChunkManifestHtmlWebpackPlugin({
+      //   filename: "chunk-manifest.json",
+      //   chunkManifestVariable: 'webpackChunkManifest',
+      //   dropAsset: true
+      // }),
       new PreloadWebpackPlugin({
         include: ['common', 'greeting']
       }),
@@ -131,26 +154,6 @@ module.exports = ({production = false, ssr = false, lite = false} = {}) => {
   // webpack additional build for production ready version
   if (production) {
     webpackConfig.plugins = webpackConfig.plugins.concat([
-      // https://webpack.js.org/plugins/uglifyjs-webpack-plugin/
-      new optimize.UglifyJsPlugin({
-        sourceMap,
-        mangle: true,
-        beautify: false,
-        comments: false,
-        // http://lisperator.net/uglifyjs/compress
-        compress: {
-          unused: true,
-          dead_code: true,
-          warnings: false,
-          drop_debugger: true,
-          conditionals: true,
-          evaluate: true,
-          drop_console: true,
-          sequences: true,
-          booleans: true,
-        },
-        extractComments: true
-      }),
       new LoaderOptionsPlugin({
         minimize: true,
         debug: false

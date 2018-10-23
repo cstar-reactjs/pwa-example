@@ -1,44 +1,42 @@
+import FirebaseApp from "./Firebase";
+
 class UsersDatabase {
-	constructor(opts) {
-		this.databaseURL = opts.databaseURL;
-		this.users = {};
-	}
+  constructor() {
+    const firestore = new FirebaseApp().firestore();
+    this.usersCollection = firestore.collection("users");
+    this.users = {};
+  }
 
-	data = (id) => id ? this.users[id] : this.users;
+  data = id => (id ? this.users[id] : this.users);
 
-	get = () => {
-		return fetch(`${this.databaseURL}/users.json/?orderBy="name"`).then(res => {
-			if (res.status !== 200) {
-				throw new Error(res.statusText);
-			}
+  get = () =>
+    this.usersCollection
+      .orderBy("name")
+      .get()
+      .then(querySnapshot => {
+        querySnapshot.forEach(doc => {
+          this.users[doc.id] = doc.data();
+        });
+      })
+      .then(() => this.users);
 
-			return res.json().then(users => this.users = users);
-		});
-	}
-
-	post = (user = {}) => {
-		return fetch(this.databaseURL, {
-			method: 'POST',
-			body: JSON.stringify(user)
-		}).then(res => {
-			if (res.status !== 200) {
-				throw new Error(res.statusText);
-			}
-
-			return res.json().then(data => {
-				this.users[data.name] = user;
-				return this.users;
-			});
-		});
-	}
+  post = (user = {}) =>
+    this.usersCollection
+      .add(user)
+      .then(docRef => {
+        this.users[docRef.id] = user;
+      })
+      .catch(err =>
+        console.error("An error ocurred when pushing a new user", err)
+      )
+      .finally(() => this.users);
 }
 
 let usersDatabaseSingleton = null;
 
-export default function (opts) {
-	if (!usersDatabaseSingleton) {
-		usersDatabaseSingleton = new UsersDatabase(opts);
-	}
-
-	return usersDatabaseSingleton;
+export default function() {
+  if (!usersDatabaseSingleton) {
+    usersDatabaseSingleton = new UsersDatabase();
+  }
+  return usersDatabaseSingleton;
 }

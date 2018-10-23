@@ -1,12 +1,9 @@
 import React from 'react';
-import {Avatar} from 'material-ui';
-import {Card, CardHeader, CardText} from 'material-ui/Card';
+import PropTypes from 'prop-types';
+import Avatar from '@material-ui/core/Avatar';
+import PersonIcon from '@material-ui/icons/Person';
+import { ListItemText } from "@material-ui/core";
 import usersDatabase from '../services/UsersDatabase';
-import {AvatarIcon} from './Icons';
-
-const style = {
-	marginBottom: '0.3em'
-};
 
 class User extends React.Component {
 	constructor(props) {
@@ -35,21 +32,23 @@ class User extends React.Component {
 		return false;
 	}
 
-	render() {
-		return (
-			<Card style={style}>
-				<CardHeader
-					title={this.state.user ? this.state.user.name : ''}
-					subtitle={this.state.user ? this.state.user.email : ''}
-					avatar={<Avatar icon={<AvatarIcon/>}/>}
-				/>
-			</Card>
-		);
-	}
+  render() {
+    return (
+      <React.Fragment>
+        <Avatar>
+          <PersonIcon />
+        </Avatar>
+        <ListItemText
+          primary={this.state.user ? this.state.user.name : ""}
+          secondary={this.state.user ? this.state.user.email : ""}
+        />
+      </React.Fragment>
+    );
+  }
 }
 
 User.propTypes = {
-	user: React.PropTypes.object,
+	user: PropTypes.object,
 };
 
 export default User;

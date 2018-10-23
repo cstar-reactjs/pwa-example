@@ -1,10 +1,23 @@
-# react-pwa-guide-kit
+# react-pwa-guide-kit-v2
 
-> This is a guide kit is designed to show how to make a Progressive Web App(PWA) and PWA features in React.js development environments. Customized and opinionated tools and build process are optimized to achive high-performed web application which is audited by strict auditor, [Lighthouse](https://github.com/GoogleChrome/lighthouse). Moreover, this guide kit is also backed by Firebase for hosting, realtime database, and also push notification.
+**Important:** This repo is a fork from [codebusking/react-pwa-guide-app](https://github.com/codebusking/react-pwa-guide-app) and it updates the main packages to their latest versions and add some others:
+- **Updated to** Webpack 4
+- **Updated to** Babel 7
+- **Added** [React Hot Loader](https://github.com/gaearon/react-hot-loader) for realtime coding experience
+- **Updated to** React 16.5 & PropTypes
+- **Removed** React Tap Event Plugin as it is deprecated since React 16.4. See [https://github.com/zilverline/react-tap-event-plugin](https://github.com/zilverline/react-tap-event-plugin)
+- **Added** [Loadable Component](https://github.com/smooth-code/loadable-components) for code splitting and in replacement of the `asyncComponent` method.
+- **Updated to** Material UI 3.3.0
+- **Updated to** Firebase 5.5.4
+- **Added** [Cloud Firestore](https://firebase.google.com/docs/firestore/?hl=es-419) for the database implementation in the *Users* component.
+
+A pull request has been created in order to integrate these changes to the original repo.
+
+> This is a guide kit is designed to show how to make a Progressive Web App(PWA) and PWA features in React.js development environments. Customized and opinionated tools and build process are optimized to achive high-performed web application which is audited by strict auditor, [Lighthouse](https://github.com/GoogleChrome/lighthouse). Moreover, this guide kit is also backed by Firebase for hosting, realtime database (cloud firestore), and also push notification.
 
 # Demo
 
-[Demo](https://react-pwa-hello-world.firebaseapp.com/#/) is working on firebase hosting. Please take a look.
+[Demo](https://react-pwa-hello-world-v2.firebaseapp.com/#/) is working on firebase hosting. Please take a look.
 
 # Features
 
@@ -33,7 +46,7 @@ To use filrebase cli tool, you must setup firelbase cli and then logged into fir
 yarn install
 
 # firebase init, input with following answers
-#   > select `hosting only`
+#   > select `firestore and hosting only`
 #   > select `your project` or `create one`
 #   > input `build` as your public directory, which is default build path
 #   > answer `no` for configuration as a single-page app
@@ -77,7 +90,7 @@ npm run deploy
 This guide-kit use Push Messaging built on top of Firebase Cloud Messaging. `Notification` page will show you peer token to send push message to current opened tab. To do this, [`fcm-cli`](https://github.com/ragingwind/fcm-cli) is a really simple and powerful tool for testing FCM on terminal. [This video will cover how to deal with fcm-cli and FCM](https://goo.gl/Jx4poC) (*Korean*)
 
 ### Local Testing
-Registering a Service Worker without a trusted SSL Connection will fail with:  [Failed to register a ServiceWorker: An SSL certificate error occurred when fetching the script](http://goo.gl/lq4gCo). 
+Registering a Service Worker without a trusted SSL Connection will fail with:  [Failed to register a ServiceWorker: An SSL certificate error occurred when fetching the script](http://goo.gl/lq4gCo).
 
 `webpack-dev-server --https` will use a self signed certificate, which is not trusted.
 Using Google Chrome, use the following flag to ignore `--unsafely-treat-insecure-origin-as-secure=https://0.0.0.0:8080`
