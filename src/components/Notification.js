@@ -7,9 +7,9 @@ class Notification extends React.Component {
   constructor(props) {
     super(props);
 
-    this.message = new FirebaseMessaging(Object.assign(firebaseConfig, {
+    this.message = new FirebaseMessaging({
       handleMessage: this.handleMessage.bind(this)
-    }));
+    });
 
     this.state = {
       token: '',
