@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {Link} from 'react-router-dom';
 import {Avatar, Dialog, FlatButton, TextField, FloatingActionButton} from 'material-ui';
 import User from './User'
@@ -85,12 +86,12 @@ class Users extends React.Component {
 		return (
 			<div>
 				{users()}
-				<FloatingActionButton style={fabStyle} onTouchTap={this.handleOpenDialog}>
+				<FloatingActionButton style={fabStyle} onClick={this.handleOpenDialog}>
 					<ContentAddIcon/>
 				</FloatingActionButton>
 				<Dialog
 					title="Adding New User"
-					actions={<FlatButton label="Submit" primary={true} onTouchTap={this.handleSubmit}/>}
+					actions={<FlatButton label="Submit" primary={true} onClick={this.handleSubmit}/>}
 					modal={false}
 					open={this.state.dialog}
 					onRequestClose={this.handleCloseDialog}
@@ -107,7 +108,7 @@ class Users extends React.Component {
 }
 
 Users.propTypes = {
-	params: React.PropTypes.object
+	params: PropTypes.object
 };
 
 export default Users;
